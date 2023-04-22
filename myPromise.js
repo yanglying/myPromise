@@ -5,7 +5,7 @@ const PENDING = "pending";
 
 //实现链式调用
 const handlePromise = (res, newPromise, resolve, reject) => {
-  //不能循环调用，会进入死循环,需要抛出错误
+  //不能循环调用，会进入死循环,此时需要抛出错误
   if (res === newPromise) {
     throw new Error("can not return oneself");
   }
@@ -13,7 +13,7 @@ const handlePromise = (res, newPromise, resolve, reject) => {
     try {
          //加个锁，实现当运行成功之后的回调后，不会再执行失败的了
          let lock = false;
-         //当前res.then返回的promise对象再去递归调用
+         //当前res.then返回的是promise对象再去递归调用
          res.then.call(
            res,
            (result) => {
@@ -34,11 +34,17 @@ const handlePromise = (res, newPromise, resolve, reject) => {
         reject(error)
     }
   }else{
+    //若res不是一个promise对象，则then 中返回一个成功状态的promise，并且值为res
     resolve(res)
+  }
+  if(res===undefined){
+    //没有返回任何值，那么 then 返回的 Promise 将会成为接受状态，并且该接受状态的回调函数的参数值为 undefined
+    resolve(undefined)
   }
 };
 class myPromise {
-  //初始化时
+  //初始化
+  //当result/reason没有进行赋值时，默认是undefined
   result = undefined;
   reason = undefined;
   status = PENDING;
@@ -51,7 +57,7 @@ class myPromise {
       if (this.status === PENDING) {
         this.status = RESOLVE;
         this.result = result;
-        //订阅完成后，执行所有回调
+        //订阅完成后，执行所有回调,即只有在状态改变之后才会去执行回调
         this.onResolvedArr.forEach((fn) => {
           fn();
         });
@@ -76,6 +82,7 @@ class myPromise {
 
   then(onResolved, onRejected) {
     //判断传入的onResolved、onRejected的类型，如果不是个方法的话，就自己写一个
+    //在promise源码中，如果传入的不是一个函数，就会跳过当前的then,这里默认传入的是函数形式
     onResolved = typeof onResolved === "function" ? onResolved : (data) => data;
     onRejected =
       typeof onRejected === "function"
@@ -86,8 +93,9 @@ class myPromise {
     const newPromise = new myPromise((resolve, reject) => {
       if (this.status === RESOLVE) {
         try {
+          //使用setTimeout只是模拟then中回调是在异步的，原生Promise并非是这样实现的。
           setTimeout(() => {
-            //拿到then中返回的结果，进行判断
+            //拿到then中函数返回的结果值res，进行判断,若返回值还是一个promise，则可以链式调用
             const res = onResolved(this.result);
             handlePromise(res, newPromise, resolve, reject);
           }, 0);
@@ -106,7 +114,7 @@ class myPromise {
         }
       }
 
-      //采用发布者订阅模式,若状态没有改变，则保存回调函数到对应数组中
+      //采用发布者订阅模式,若状态没有改变，则保存回调函数到对应数组中，之后等待状态变化之后再执行
       if (this.status === PENDING) {
         //先订阅
         this.onResolvedArr.push(() => {
@@ -140,14 +148,20 @@ class myPromise {
     return this.then(onFinally, onFinally);
   }
   static resolve = (value) => {
+    if (value instanceof myPromise) {
+      //如果传入的参数为Promise对象，则返回的结果由该传入的Promise对象的值决定
+      return value
+    } 
     return new myPromise((resolve, reject) => {
-      if (value instanceof myPromise) {
-        //如果传入的参数为Promise对象，则返回的结果由该传入的Promise对象的值决定
-        value.then(resolve, reject);
-      } else {
-        resolve(value);
-      }
-    });
+       if(value&&typeof value ==='object'&&typeof value.then==='function')
+        {
+          setTimeout(()=>{
+            value.then(resolve,reject)
+          })
+        }else{
+          resolve(value)
+        }
+      });
   };
   static reject = (reason) => {
     return new myPromise((resolve, reject) => {
