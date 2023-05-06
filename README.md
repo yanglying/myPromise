@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # myElement-plus
 
 This template should help get you started developing with Vue 3 in Vite.
@@ -44,3 +45,7 @@ npm run build
 ```sh
 npm run lint
 ```
+=======
+# myPromise
+MyPromise
+>>>>>>> 3ccfe4af688317963062a4d82eab2cd60b68482d
