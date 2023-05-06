@@ -1,36 +1,44 @@
 <template>
-  <transition name="jspp-message">
-    <div :class="styleClass">
-       <span> {{ message }}</span>
+  <transition name="msg">
+    <div :class="styleClass" v-if="isVisable">
+      <span> {{ message }}</span>
     </div>
   </transition>
 </template>
 
 <script lang="ts" setup>
-import { defineProps ,computed} from "vue";
-import types from "../message/type";
+import { defineProps, computed, ref, defineExpose } from 'vue'
+import types from '../message/type'
 const props = defineProps({
   type: {
     type: String,
     default: types.MESSAGE,
     Validator(value: string) {
-      return Object.values(types).includes(value);
-    },
+      return Object.values(types).includes(value)
+    }
   },
   message: {
     type: String,
-    default: types.MESSAGE,
-  },
-});
-const styleClass=computed(()=>['jspp-message',props.type])
+    default: types.MESSAGE
+  }
+})
+const styleClass = computed(() => ['msg', props.type])
+
+let isVisable = ref(true)
+function changeVisable() {
+  isVisable.value = true
+}
+defineExpose({
+  changeVisable
+})
 </script>
 
 <style lang="less" scoped>
-.jspp-message {
-   width:340px;
-   height: 40px;
-   display: flex;
-   border-radius: 10px;
+.msg {
+  width: 300px;
+  height: 40px;
+  display: flex;
+  border-radius: 5px;
   justify-content: center;
   align-items: center;
   //并列选择器，根据传入的type类型来决定采用哪种样式
@@ -50,5 +58,21 @@ const styleClass=computed(()=>['jspp-message',props.type])
     background-color: rgb(184, 187, 184);
     color: rgb(15, 15, 15);
   }
+}
+
+.msg-enter-from {
+  height: 10px;
+}
+.msg-enter-to,
+.msg-leave-from {
+  // transform: translatex(10px);
+  height: 100px;
+}
+.msg-leave-to {
+  height: 10px;
+}
+.msg-enter-active,
+.msg-leave-active {
+  transition: all 1s ease-in;
 }
 </style>
