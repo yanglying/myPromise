@@ -9,6 +9,7 @@
 <script lang="ts" setup>
 import { defineProps, computed, ref, defineExpose } from 'vue'
 import types from '../message/type'
+
 const props = defineProps({
   type: {
     type: String,
@@ -24,9 +25,9 @@ const props = defineProps({
 })
 const styleClass = computed(() => ['msg', props.type])
 
-let isVisable = ref(true)
-function changeVisable() {
-  isVisable.value = true
+let isVisable = ref(false)
+function changeVisable(values: boolean) {
+  isVisable.value = values
 }
 defineExpose({
   changeVisable
@@ -60,17 +61,15 @@ defineExpose({
   }
 }
 
-.msg-enter-from {
-  height: 10px;
-}
 .msg-enter-to,
 .msg-leave-from {
-  // transform: translatex(10px);
-  height: 100px;
+  opacity: 0;
 }
+.msg-enter-from,
 .msg-leave-to {
-  height: 10px;
+  transform: translateY(50px);
 }
+
 .msg-enter-active,
 .msg-leave-active {
   transition: all 1s ease-in;

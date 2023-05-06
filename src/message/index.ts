@@ -3,9 +3,6 @@ import { createApp, ref } from 'vue'
 import type { App } from 'vue'
 import MessageComponent from '../components/Message.vue'
 
-const msg = ref(null)
-console.log(msg)
-
 interface IMessage {
   [index: string]: (obj: any) => void
 }
@@ -24,7 +21,9 @@ Object.values(types).forEach((item: string) => {
 
 function showMessage(app: App) {
   const el: HTMLDivElement = document.createElement('div')
-  app.mount(el)
+  const vm = app.mount(el)
+  vm.changeVisable(true)
+
   document.body.appendChild(el)
   //   msg.value.changeVisable()
   //   hideMessage(app)
