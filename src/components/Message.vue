@@ -1,7 +1,10 @@
 <template>
   <transition name="msg">
-    <div :class="styleClass" v-if="isVisable">
-      <span> {{ message }}</span>
+    <div :class="styleClass" v-if="isVisable" :style="{
+      top:top+'px',
+      
+    }">
+      {{ message }}
     </div>
   </transition>
 </template>
@@ -23,14 +26,38 @@ const props = defineProps({
     default: types.MESSAGE
   }
 })
+
+//绑定样式class
 const styleClass = computed(() => ['msg', props.type])
 
+//isVisable用于实现动画效果的变量
 let isVisable = ref(false)
-function changeVisable(values: boolean) {
-  isVisable.value = values
+let top = ref<number>(0)
+function changeVisable(Visable: boolean) {
+  return new Promise<void>((resolve) => {
+    isVisable.value = Visable
+    console.log(isVisable.value);
+    
+    //等待动画加载完之后
+    setTimeout(() => {
+      resolve('')
+    },300);
+  })
 }
+
+
+function setTop(topValue:number) {
+  top.value=topValue
+  return topValue
+}
+
+//将修改变量isVisable的方法暴露出去，实现外面点击才出现动画
 defineExpose({
-  changeVisable
+  changeVisable,
+  height:40,
+  margin:10,
+  top,
+  setTop
 })
 </script>
 
@@ -39,9 +66,15 @@ defineExpose({
   width: 300px;
   height: 40px;
   display: flex;
+  position:fixed;
+  left:50%;
+  z-index: 999;
+  margin-left: -150px;
+  
   border-radius: 5px;
   justify-content: center;
   align-items: center;
+  transition: top 1s ease-out;
   //并列选择器，根据传入的type类型来决定采用哪种样式
   &.erro {
     background-color: rgb(246, 215, 215);
@@ -61,17 +94,19 @@ defineExpose({
   }
 }
 
-.msg-enter-to,
-.msg-leave-from {
+.msg-leave-to{
   opacity: 0;
 }
-.msg-enter-from,
-.msg-leave-to {
-  transform: translateY(50px);
+.msg-leave-from{
+  transform: translateY(20px);
 }
 
-.msg-enter-active,
+.msg-enter-to,
+.msg-enter-from{
+  transform: translateY(20px);
+}
+
 .msg-leave-active {
-  transition: all 1s ease-in;
+  transition: all .3s ease-out;
 }
 </style>

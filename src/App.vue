@@ -2,21 +2,21 @@
   <button
     @click="
       Message({
-        type: 'success',
+        type: 'erro',
         message: 'yly'
       })
     "
   >
-    点我1
+    erro
   </button>
   <button
     @click="
-      Message.success({
+      Message.message({
         message: 'xxxxxxxxxx'
       })
     "
   >
-    点我2
+    message
   </button>
 </template>
 
